@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>OMAR AI — Intelligence System</title>
+<style>
+:root{--navy:#101827;--blue:#2563eb;--blue2:#60a5fa;--ink:#101828;--muted:#64748b;--line:#e2e8f0;--bg:#f4f7fb;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,Roboto,Arial}
+button,input,textarea{font:inherit}button{cursor:pointer}
+.shell{min-height:100vh;display:grid;grid-template-columns:260px 1fr}
+.side{background:var(--navy);color:white;padding:22px 16px;display:flex;flex-direction:column;gap:18px}
+.brand{font-size:23px;font-weight:850;letter-spacing:.8px}.brand span{color:#60a5fa}.tag{font-size:10px;color:#a9b8cc;letter-spacing:2px;margin-top:3px}
+.new{border:1px solid #40506a;color:#fff;background:#1b2a40;border-radius:10px;padding:12px;text-align:left}
+.side-label{font-size:11px;color:#93a4bc;text-transform:uppercase;letter-spacing:1px;margin:8px 0}
+.project-list{display:grid;gap:7px}.project{padding:9px;border-radius:8px;color:#d8e2f0;background:transparent;border:0;text-align:left}
+.project.active,.project:hover{background:#243650}.private{margin-top:auto;border-top:1px solid #34445b;padding-top:14px;color:#b8c5d7;font-size:12px}
+main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
+.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px}
+.status{font-size:12px;color:#16734b;background:#e9f8ef;padding:7px 10px;border-radius:30px}
+.content{width:min(900px,100%);margin:0 auto;padding:28px 22px;display:flex;flex-direction:column;flex:1}
+.welcome{margin:32px auto 24px;text-align:center;max-width:650px}.orb{width:62px;height:62px;border-radius:19px;background:linear-gradient(145deg,#101827,#2563eb);color:white;display:grid;place-items:center;font-size:27px;margin:0 auto 16px;box-shadow:0 12px 30px #2563eb30}
+h1{font-size:29px;margin:0 0 8px}.sub{color:var(--muted);line-height:1.55}
+.suggestions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px auto 25px;width:min(650px,100%)}
+.suggest{background:white;border:1px solid var(--line);border-radius:12px;padding:13px;text-align:left;color:#263449}.suggest b{display:block;margin-bottom:4px}.suggest small{color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:14px;padding-bottom:20px}
+.msg{max-width:86%;padding:13px 15px;border-radius:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:#e5efff;border:1px solid #c9dcff}.msg.ai{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+.composer{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 20%);padding:16px 0 8px}
+.composebox{background:white;border:1px solid #d7e0ec;border-radius:16px;padding:10px;box-shadow:0 8px 28px #172b4d0d}
+textarea{width:100%;resize:vertical;min-height:58px;max-height:180px;border:0;outline:0;padding:8px;color:var(--ink)}
+.actions{display:flex;align-items:center;justify-content:space-between;padding:3px 4px}
+.hint{font-size:11px;color:#8290a3}.send{border:0;background:var(--blue);color:white;border-radius:10px;padding:10px 18px;font-weight:700}.send:disabled{opacity:.5}
+.overlay{position:fixed;inset:0;background:#0b1425d9;display:grid;place-items:center;padding:20px;z-index:5}
+.login{background:white;width:min(390px,100%);border-radius:18px;padding:27px;box-shadow:0 25px 80px #0005}
+.login h2{margin:0 0 5px}.login p{color:var(--muted);font-size:13px;line-height:1.5}
+.login input{width:100%;padding:13px;border:1px solid var(--line);border-radius:10px;margin:12px 0}
+.primary{background:var(--blue);color:white;border:0;border-radius:10px;padding:12px 16px;font-weight:700;width:100%}
+.error{color:#b42318;font-size:12px;min-height:18px}
+.hidden{display:none!important}
+@media(max-width:720px){.shell{grid-template-columns:1fr}.side{display:none}.top{padding:0 16px}.content{padding:20px 14px}.welcome{margin-top:22px}h1{font-size:25px}.suggestions{grid-template-columns:1fr}.msg{max-width:94%}}
+</style>
+</head>
+<body>
+<div class="overlay" id="login">
+  <div class="login">
+    <div class="brand" style="color:#101827">OMAR <span>AI</span></div>
+    <div class="tag" style="color:#64748b">PRIVATE INTELLIGENCE SYSTEM</div>
+    <h2 style="margin-top:24px">Acesso privado</h2>
+    <p>Introduz a palavra-passe definida pelo proprietário para abrir o teu assistente.</p>
+    <input id="password" type="password" placeholder="Palavra-passe de acesso" autocomplete="current-password">
+    <div class="error" id="loginError"></div>
+    <button class="primary" id="loginBtn">Entrar</button>
+  </div>
+</div>
+<div class="shell">
+  <aside class="side">
+    <div><div class="brand">OMAR <span>AI</span></div><div class="tag">INTELLIGENCE SYSTEM</div></div>
+    <button class="new" id="newChat">＋ Nova conversa</button>
+    <div><div class="side-label">Espaço de trabalho</div><div class="project-list"><button class="project active">◈ Assistente principal</button><button class="project">▣ Projetos (em preparação)</button></div></div>
+    <div class="private">● Modo privado<br>As chaves ficam no servidor, não no navegador.</div>
+  </aside>
+  <main>
+    <header class="top"><b>Assistente principal</b><span class="status">● Sistema pronto</span></header>
+    <section class="content">
+      <div class="welcome" id="welcome">
+        <div class="orb">✦</div>
+        <h1>Como posso ajudar?</h1>
+        <div class="sub">Sou a OMAR AI. Posso ajudar a analisar problemas, planear projetos, escrever código e orientar tarefas complexas.</div>
+      </div>
+      <div class="suggestions" id="suggestions">
+        <button class="suggest" data-prompt="Ajuda-me a planear e desenvolver um site completo, desde a ideia até à publicação."><b>⌘ Criar um site</b><small>Planear, programar e publicar</small></button>
+        <button class="suggest" data-prompt="Analisa este problema complexo, divide-o em etapas e apresenta uma solução verificável."><b>✧ Resolver um problema</b><small>Análise e raciocínio passo a passo</small></button>
+        <button class="suggest" data-prompt="Ensina-me a criar uma aplicação Android usando apenas o meu telemóvel."><b>▣ Criar uma aplicação</b><small>Desenvolvimento Android</small></button>
+        <button class="suggest" data-prompt="Ajuda-me a organizar os meus projetos e define as próximas tarefas prioritárias."><b>◷ Organizar projetos</b><small>Plano de trabalho e prioridades</small></button>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="composer">
+        <div class="composebox">
+          <textarea id="message" placeholder="Escreve uma ordem para a OMAR AI..." rows="2"></textarea>
+          <div class="actions"><span class="hint">Enter para enviar · Shift + Enter para nova linha</span><button class="send" id="send">Enviar ↑</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+let password = sessionStorage.getItem("omar_password") || "";
+let history = JSON.parse(localStorage.getItem("omar_history") || "[]");
+function showLogin(){ $("login").classList.remove("hidden"); }
+function hideLogin(){ $("login").classList.add("hidden"); }
+function render(){
+  $("chat").innerHTML = "";
+  $("welcome").classList.toggle("hidden", history.length > 0);
+  $("suggestions").classList.toggle("hidden", history.length > 0);
+  history.forEach(m => {
+    const el=document.createElement("div"); el.className="msg "+(m.role==="user"?"user":"ai");
+    el.textContent=m.content; $("chat").appendChild(el);
+  });
+  window.scrollTo(0,document.body.scrollHeight);
+}
+async function login(){
+  const candidate=$("password").value;
+  if(!candidate) return;
+  password=candidate;
+  try{
+    const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json","x-omar-password":password},body:JSON.stringify({message:"Responde apenas: acesso confirmado."})});
+    const d=await r.json();
+    if(!r.ok){$("loginError").textContent=d.error||"Não foi possível entrar.";return;}
+    sessionStorage.setItem("omar_password",password); hideLogin(); $("loginError").textContent="";
+  }catch(e){$("loginError").textContent="Sem ligação. Verifica a internet.";}
+}
+async function send(text){
+  const message=(text||$("message").value).trim();
+  if(!message) return;
+  $("message").value=""; history.push({role:"user",content:message}); render();
+  const wait={role:"assistant",content:"A OMAR AI está a analisar a tua ordem…"};
+  history.push(wait); render(); $("send").disabled=true;
+  try{
+    const context=history.slice(0,-1,-1);
+    const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json","x-omar-password":password},body:JSON.stringify({message,history:history.slice(0,-2)})});
+    const d=await r.json();
+    history.pop();
+    if(!r.ok) history.push({role:"assistant",content:"Erro: "+(d.error||"Não foi possível responder.")});
+    else history.push({role:"assistant",content:d.answer});
+  }catch(e){history.pop();history.push({role:"assistant",content:"Falha de ligação. Tenta novamente."});}
+  localStorage.setItem("omar_history",JSON.stringify(history.slice(-40))); render(); $("send").disabled=false;
+}
+$("loginBtn").onclick=login;
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+$("send").onclick=()=>send();
+$("message").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
+$("newChat").onclick=()=>{history=[];localStorage.removeItem("omar_history");render();};
+document.querySelectorAll(".suggest").forEach(b=>b.onclick=()=>send(b.dataset.prompt));
+render();
+if(password){$("password").value=password;login();}else showLogin();
+</script>
+</body>
+</html>

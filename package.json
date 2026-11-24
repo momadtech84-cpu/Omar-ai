@@ -1,0 +1,8 @@
+{
+  "name": "omar-ai-v1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OMAR AI private assistant",
+  "scripts": { "start": "vercel dev" },
+  "engines": { "node": ">=20" }
+}
